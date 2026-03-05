@@ -1,0 +1,24 @@
+[
+  {
+    "id": "xxx-yyy-zzz",
+    "reset_cycle": "*/10 * * * * *",
+    "name": "测试",
+    "message": "2秒内 总请求数大于10次，或具体某个URL请求大于5次，则发送信息到 udp 127.0.0.1:1234 端口",
+    "actions": [
+      ["udp","127.0.0.1:1234"]
+    ],
+    "is_enabled":true,
+    "aggregates": [
+      [ "or",
+        ["client_ip", ">", 10, {"$mode":"count", "$group":["client_ip","request_host"]}],
+        ["url", ">", 5 ,   {"$mode":"count", "$group":["client_ip","request_host","url"]}]
+      ],
+      ["response_body_bytes",">",10241024, {"$mode":"sum", "$group":["request_host"]}]
+    ],
+    "conditions": [
+      ["request_path","regex","^/test(.[a-z]{3,4})$"],
+      ["request_host", "=", "a.com"]
+    ],
+    "duration": ["fixed",10]
+  }
+]
